@@ -1,0 +1,41 @@
+{
+  "title": "Яна Рулло",
+  "navigation": [
+    {
+      "title": "Обо мне",
+      "url": "/about-me/"
+    },
+    {
+      "title": "Сертификаты",
+      "url": "/certificates/"
+    },
+    {
+      "title": "Отзывы",
+      "url": "/reviews/"
+    },
+    {
+      "title": "Контакты",
+      "url": "/contacts/"
+    }
+  ],
+  "socialLinks": [
+    {
+      "title": "Telegram",
+      "icon": "telegram",
+      "label": "@nastoyashayana",
+      "url": "https://t.me/nastoyashayana"
+    },
+    {
+      "title": "Instagram",
+      "icon": "instagram",
+      "label": "@rullo_ya",
+      "url": "https://www.instagram.com/rullo_ya/"
+    },
+    {
+      "title": "YouTube",
+      "icon": "youtube",
+      "label": "YT",
+      "url": "https://www.youtube.com/@YanaRullo"
+    }
+  ]
+}

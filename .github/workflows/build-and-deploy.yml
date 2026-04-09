@@ -1,0 +1,61 @@
+name: Build and Deploy
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cache pnpm Store
+        uses: actions/cache@v4
+        with:
+          path: .pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install Dependencies
+        run: nix develop --command just install
+
+      - name: Build Site
+        run: nix develop --command just build
+
+      - name: Deploy Site Branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        env:
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+        run: |
+          nix develop --command ghp-import \
+            --no-jekyll \
+            --push \
+            --force \
+            --branch deploy-master \
+            _site
+
+      - name: Deploy Cloudflare Pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        env:
+          CLOUDFLARE_ACCOUNT_ID: 83953e8a88bb81bbe07a62c18d4c6f72
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          nix develop --command pnpm exec wrangler pages deploy \
+            _site \
+            --project-name yanarullo

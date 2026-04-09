@@ -1,0 +1,81 @@
+---
+layout: layouts/base.njk
+---
+{% block content %}
+  <section class="max-w-3xl">
+    <h1 class="page-title">{{ title }}</h1>
+    <div class="prose prose-zinc mt-6 max-w-none">
+      {{ content | safe }}
+    </div>
+
+    <div class="reviews-carousel mt-10" data-carousel>
+      <div class="reviews-carousel__viewport">
+        {% for image in reviewImages %}
+          <figure class="reviews-carousel__slide{% if loop.first %} is-active{% endif %}" data-slide {% if not loop.first %}hidden{% endif %}>
+            <img src="{{ image }}" alt="Отзыв клиента {{ loop.index }}">
+          </figure>
+        {% endfor %}
+      </div>
+
+      <div class="reviews-carousel__controls">
+        <button class="reviews-carousel__button" type="button" data-prev aria-label="Предыдущий отзыв">Назад</button>
+        <p class="reviews-carousel__status" data-status>1 / {{ reviewImages | length }}</p>
+        <button class="reviews-carousel__button" type="button" data-next aria-label="Следующий отзыв">Далее</button>
+      </div>
+
+      <div class="reviews-carousel__dots" aria-label="Навигация по отзывам">
+        {% for image in reviewImages %}
+          <button
+            class="reviews-carousel__dot{% if loop.first %} is-active{% endif %}"
+            type="button"
+            data-dot
+            data-index="{{ loop.index0 }}"
+            aria-label="Показать отзыв {{ loop.index }}"
+            aria-pressed="{% if loop.first %}true{% else %}false{% endif %}"
+          ></button>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <script>
+    (() => {
+      const carousel = document.querySelector("[data-carousel]");
+      if (!carousel) return;
+
+      const slides = Array.from(carousel.querySelectorAll("[data-slide]"));
+      const dots = Array.from(carousel.querySelectorAll("[data-dot]"));
+      const status = carousel.querySelector("[data-status]");
+      const prev = carousel.querySelector("[data-prev]");
+      const next = carousel.querySelector("[data-next]");
+      let activeIndex = 0;
+
+      const render = (index) => {
+        activeIndex = (index + slides.length) % slides.length;
+
+        slides.forEach((slide, slideIndex) => {
+          const isActive = slideIndex === activeIndex;
+          slide.hidden = !isActive;
+          slide.classList.toggle("is-active", isActive);
+        });
+
+        dots.forEach((dot, dotIndex) => {
+          const isActive = dotIndex === activeIndex;
+          dot.classList.toggle("is-active", isActive);
+          dot.setAttribute("aria-pressed", isActive ? "true" : "false");
+        });
+
+        status.textContent = `${activeIndex + 1} / ${slides.length}`;
+      };
+
+      prev.addEventListener("click", () => render(activeIndex - 1));
+      next.addEventListener("click", () => render(activeIndex + 1));
+
+      dots.forEach((dot, index) => {
+        dot.addEventListener("click", () => render(index));
+      });
+
+      render(0);
+    })();
+  </script>
+{% endblock %}
